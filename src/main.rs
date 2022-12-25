@@ -197,14 +197,10 @@ impl State {
         let l_to_r = self.particles[rhs]
             .position
             .minus(self.particles[lhs].position);
-        let unit_l_to_r = l_to_r.product(1.0 / l_to_r.norm());
+        let displacement_vec = l_to_r.product(displacement / l_to_r.norm());
 
-        self.particles[lhs].position = self.particles[lhs]
-            .position
-            .minus(unit_l_to_r.product(displacement));
-        self.particles[rhs].position = self.particles[rhs]
-            .position
-            .plus(unit_l_to_r.product(displacement));
+        self.particles[lhs].position = self.particles[lhs].position.minus(displacement_vec);
+        self.particles[rhs].position = self.particles[rhs].position.plus(displacement_vec);
 
         // Change symbol type
         self.particles[lhs].handle_match(self.particles[rhs].hand);
