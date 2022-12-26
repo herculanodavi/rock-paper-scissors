@@ -4,6 +4,6 @@ This is a 2D particle simulation game, where each particle is either Rock, Paper
 
 ![](https://github.com/herculanodavi/rock-paper-scissors/blob/main/resources/game.gif)
 
-On every collision, there is a match and if there is a loser, it will be transformed into the winner type. 
+If two particles collide, there is a match between the two particle types. If the match is not a draw, the losing particle type will be changet to the winner particle type. 
 
 The game is built using `bracket_lib` as the UI framework. 
