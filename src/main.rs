@@ -3,7 +3,7 @@ use bracket_lib::prelude::*;
 enum GameMode {
     Menu,
     Playing,
-    End,
+    End { winner: Hand },
 }
 
 const SCREEN_WIDTH: i32 = 80;
@@ -167,7 +167,7 @@ struct State {
     particles: [Particle; NUM_PARTICLES],
     frame_time: f32,
     mode: GameMode,
-    score: i32,
+    score: f32,
 }
 
 impl State {
@@ -176,7 +176,7 @@ impl State {
             particles: [(); NUM_PARTICLES].map(|_| Particle::new()),
             frame_time: 0.0,
             mode: GameMode::Menu,
-            score: 0,
+            score: 0.0,
         }
     }
 
@@ -232,17 +232,41 @@ impl State {
         for particle in &self.particles {
             particle.render(ctx);
         }
+
+        ctx.print(0, 0, "Scores");
+        let hands = [Hand::Rock, Hand::Paper, Hand::Scissors];
+        let mut counts: [usize; 3] = [0, 0, 0];
+
+        self.particles.iter().for_each(|p| {
+            let idx = match p.hand {
+                Hand::Rock => 0,
+                Hand::Paper => 1,
+                Hand::Scissors => 2,
+            };
+            counts[idx] += 1;
+        });
+
+        hands.iter().enumerate().for_each(|(i, hand)| {
+            ctx.print(0, i + 1, &format!("{:?}: {}", hand, counts[i]));
+
+            if counts[i] == NUM_PARTICLES {
+                self.mode = GameMode::End{winner: *hand};
+            }
+        });
+
+        self.score += ctx.frame_time_ms;
     }
 
     fn restart(&mut self) {
+        self.particles = [(); NUM_PARTICLES].map(|_| Particle::new());
         self.frame_time = 0.0;
         self.mode = GameMode::Playing;
-        self.score = 0;
+        self.score = 0.0;
     }
 
     fn main_menu(&mut self, ctx: &mut BTerm) {
         ctx.cls();
-        ctx.print_centered(5, "Welcome to Flappy Dragon!");
+        ctx.print_centered(5, "Welcome to Rock Paper Scissors!");
         ctx.print_centered(8, "(P) Play Game");
         ctx.print_centered(9, "(Q) Quit Game");
 
@@ -255,10 +279,10 @@ impl State {
         }
     }
 
-    fn dead(&mut self, ctx: &mut BTerm) {
+    fn dead(&mut self, ctx: &mut BTerm, winner: Hand) {
         ctx.cls();
-        ctx.print_centered(5, "You are dead!");
-        ctx.print_centered(6, &format!("You earned {} points", self.score));
+        ctx.print_centered(5, &format!("The winner is: {:?}!", winner));
+        ctx.print_centered(6, &format!("This game lasted for {} seconds.", self.score / 1000.0));
         ctx.print_centered(8, "(P) Play Game");
         ctx.print_centered(9, "(Q) Quit Game");
 
@@ -276,7 +300,7 @@ impl GameState for State {
     fn tick(&mut self, ctx: &mut BTerm) {
         match self.mode {
             GameMode::Menu => self.main_menu(ctx),
-            GameMode::End => self.dead(ctx),
+            GameMode::End {winner } => self.dead(ctx, winner),
             GameMode::Playing => self.play(ctx),
         }
     }
