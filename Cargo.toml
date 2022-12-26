@@ -1,5 +1,5 @@
 [package]
-name = "flappy-dragon"
+name = "rock-paper-scissors"
 version = "0.1.0"
 edition = "2021"
 

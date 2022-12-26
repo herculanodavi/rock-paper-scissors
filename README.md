@@ -1,4 +1,7 @@
-# Flappy Dragon
-My first game in Rust: Flappy Dragon, a version of Flappy Bird running on the terminal. Based on the educative.io course "Hands-on Game Development with Rust".
+# Rock Paper Scissors
+
+This is a 2D particle simulation game, where each particle is either Rock, Paper or Scissors.
+
+On every collision, there is a match and if there is a loser, it will be transformed into the winner type. 
 
 The game is built using `bracket_lib` as the UI framework. 
