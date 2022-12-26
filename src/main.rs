@@ -167,7 +167,7 @@ struct State {
     particles: [Particle; NUM_PARTICLES],
     frame_time: f32,
     mode: GameMode,
-    score: f32,
+    elapsed_time: f32,
 }
 
 impl State {
@@ -176,7 +176,7 @@ impl State {
             particles: [(); NUM_PARTICLES].map(|_| Particle::new()),
             frame_time: 0.0,
             mode: GameMode::Menu,
-            score: 0.0,
+            elapsed_time: 0.0,
         }
     }
 
@@ -233,7 +233,12 @@ impl State {
             particle.render(ctx);
         }
 
-        ctx.print(0, 0, "Scores");
+        ctx.print(
+            0,
+            0,
+            &format!("Elapsed time: {}", self.elapsed_time / 1000.0),
+        );
+        ctx.print(0, 1, "Scores");
         let hands = [Hand::Rock, Hand::Paper, Hand::Scissors];
         let mut counts: [usize; 3] = [0, 0, 0];
 
@@ -247,21 +252,21 @@ impl State {
         });
 
         hands.iter().enumerate().for_each(|(i, hand)| {
-            ctx.print(0, i + 1, &format!("{:?}: {}", hand, counts[i]));
+            ctx.print(0, 2 + i, &format!("{:?}: {}", hand, counts[i]));
 
             if counts[i] == NUM_PARTICLES {
-                self.mode = GameMode::End{winner: *hand};
+                self.mode = GameMode::End { winner: *hand };
             }
         });
 
-        self.score += ctx.frame_time_ms;
+        self.elapsed_time += ctx.frame_time_ms;
     }
 
     fn restart(&mut self) {
         self.particles = [(); NUM_PARTICLES].map(|_| Particle::new());
         self.frame_time = 0.0;
         self.mode = GameMode::Playing;
-        self.score = 0.0;
+        self.elapsed_time = 0.0;
     }
 
     fn main_menu(&mut self, ctx: &mut BTerm) {
@@ -282,7 +287,13 @@ impl State {
     fn dead(&mut self, ctx: &mut BTerm, winner: Hand) {
         ctx.cls();
         ctx.print_centered(5, &format!("The winner is: {:?}!", winner));
-        ctx.print_centered(6, &format!("This game lasted for {} seconds.", self.score / 1000.0));
+        ctx.print_centered(
+            6,
+            &format!(
+                "This game lasted for {} seconds.",
+                self.elapsed_time / 1000.0
+            ),
+        );
         ctx.print_centered(8, "(P) Play Game");
         ctx.print_centered(9, "(Q) Quit Game");
 
@@ -300,7 +311,7 @@ impl GameState for State {
     fn tick(&mut self, ctx: &mut BTerm) {
         match self.mode {
             GameMode::Menu => self.main_menu(ctx),
-            GameMode::End {winner } => self.dead(ctx, winner),
+            GameMode::End { winner } => self.dead(ctx, winner),
             GameMode::Playing => self.play(ctx),
         }
     }
