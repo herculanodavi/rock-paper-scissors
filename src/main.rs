@@ -233,11 +233,13 @@ impl State {
             particle.render(ctx);
         }
 
+        self.elapsed_time += ctx.frame_time_ms;
         ctx.print(
             0,
             0,
             &format!("Elapsed time: {}", self.elapsed_time / 1000.0),
         );
+
         ctx.print(0, 1, "Scores");
         let hands = [Hand::Rock, Hand::Paper, Hand::Scissors];
         let mut counts: [usize; 3] = [0, 0, 0];
@@ -258,8 +260,13 @@ impl State {
                 self.mode = GameMode::End { winner: *hand };
             }
         });
-
-        self.elapsed_time += ctx.frame_time_ms;
+    
+        if let Some(key) = ctx.key {
+            match key {
+                VirtualKeyCode::Q => self.mode = GameMode::Menu,
+                _ => {}
+            }
+        }
     }
 
     fn restart(&mut self) {
