@@ -6,8 +6,8 @@ enum GameMode {
     End { winner: Hand },
 }
 
-const SCREEN_WIDTH: i32 = 80;
-const SCREEN_HEIGHT: i32 = 80;
+const SCREEN_WIDTH: i32 = 60;
+const SCREEN_HEIGHT: i32 = 60;
 const FRAME_DURATION: f32 = 60.0;
 
 const NUM_PARTICLES: usize = 25;
